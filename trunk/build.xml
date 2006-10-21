@@ -1,0 +1,69 @@
+<project name="JMus" default="runjar" basedir=".">
+	<target name="init" depends="clean">
+		<property environment="env"/>
+		<property name="dist.dir" location="dist"/>	
+		<property name="src.dir" location="src"/>
+		<property name="lib.dir" location="lib"/>
+		<property name="doc.dir" location="doc"/>
+		<property name="bin.dir" location="bin"/>
+		<property name="res.dir" value="res"/>
+	</target>	
+
+	<target name="clean">
+		<delete dir="${bin.dir}"/>
+		<delete dir="${dist.dir}"/>
+	</target>
+
+	<target name="jar" depends="compile">
+	  	<copy todir="${dist.dir}" includeemptydirs="false">
+	  		<fileset dir="${bin.dir}" excludes="*.jar" />
+		</copy>
+	  	<unjar dest="${dist.dir}">
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</unjar>
+		<jar destfile="${basedir}/jmus.jar" >
+			<manifest>
+		  		<attribute name="Main-Class" value="Main"/>
+			  </manifest>
+			<zipfileset dir="${dist.dir}"/>
+		</jar>
+	</target>
+
+	<target name="compile" depends="init">
+		<mkdir dir="${bin.dir}"/>
+		<javac srcdir="${src.dir}" destdir="${bin.dir}">
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+		<mkdir dir="${bin.dir}/${res.dir}"/>
+		<copy todir="${bin.dir}/${res.dir}" includeemptydirs="false">
+			<fileset dir="${src.dir}/${res.dir}" />
+		</copy>
+	</target>
+	
+	<target name="javadoc" depends="init">
+		<delete dir="${doc.dir}"/>
+		<javadoc packagenames="ist.mus.*" sourcepath="${src.dir}" destdir="${doc.dir}" windowtitle="JMus JavaDoc"/>
+	</target>
+	
+	<target name="runjar" depends="jar">
+		<java jar="${basedir}/jmus.jar" fork="true"/>
+	</target>
+	
+	<target name="run" depends="compile">
+		<java classname="Main" fork="true">
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar" />
+				</fileset>
+				<dirset dir="${bin.dir}" />
+			</classpath>
+		</java>
+	</target>
+
+</project>
